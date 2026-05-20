@@ -1,7 +1,7 @@
-#include <Adafruit_NeoPixel.h>
+include <Adafruit_NeoPixel.h>
 
-#define LED_PIN       6  // WS2812BのDIN（データ線）を繋ぐピン
-#define NUMPIXELS   144  // ★LEDの個数を144個に設定しました
+define LED_PIN       6  // WS2812BのDIN（データ線）を繋ぐピン
+define NUMPIXELS   144  // ★LEDの個数を144個に設定しました
 
 // NeoPixelオブジェクトの宣言
 Adafruit_NeoPixel pixels(NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
