@@ -76,7 +76,7 @@ def start_basil_monitor():
                         send_to_discord(discord_msg)
                         
                         # テスト用に1分（60秒）待機。安定したら1800（30分）や3600（1時間）に延ばしてください
-                        time.sleep(60)
+                        time.sleep(1800)
                         
                 except ValueError:
                     pass
