@@ -3,7 +3,7 @@ import requests
 import time
 
 # --- 【設定】 ---
-TARGET_PORT = '/dev/ttyACM1'  # ポートがACM0の場合は戻してください
+TARGET_PORT = '/dev/ttyACM0'  # ポートがACM0の場合は戻してください
 TARGET_BAUD = 9600            
 WEBHOOK_URL = "https://discord.com/api/webhooks/1503584418554577109/8DLrXh09eSEdmCt0B1eeMxthnxWsAi10lU65Dr5Y9fL52Uy-bhYwAZ4pKqWSZ7az5uQl"
 # --------------
