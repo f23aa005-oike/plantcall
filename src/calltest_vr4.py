@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 # --- 【設定】 ---
 load_dotenv() # .env ファイルから環境変数を読み込む
 
-TARGET_PORT = '/dev/ttyACM1'  # 現在認識されているポート（ACM0 か ACM1）に合わせてください
+TARGET_PORT = '/dev/ttyACM0'  # 現在認識されているポート（ACM0 か ACM1）に合わせてください
 TARGET_BAUD = 9600            
 
 # .env からURLを取得（無ければ直書きのURLを予備で使用）
