@@ -61,13 +61,14 @@ def start_basil_monitor():
                 try:
                     data_list = msg.split(',')
                     if len(data_list) == 5:
-                        temp = float(data_list[0])
-                        hum  = float(data_list[1])
-                        pres = float(data_list[2])
-                        lux  = float(data_list[3])
-                        soil_val = int(data_list[4])
+                        # 🔴 シリアルモニタの並び順（0から順番）に完全に一致させます！
+                        temp     = float(data_list[0])  # 1番目: 25.42
+                        hum      = float(data_list[1])  # 2番目: 49.78
+                        pres     = float(data_list[2])  # 3番目: 995.39
+                        lux      = float(data_list[3])  # 4番目: 565.00
+                        soil_val = int(data_list[4])    # 5番目: 524
                         
-                        # 水分量計算（乾燥576 〜 湿潤271）
+                        # 水分量のパーセンテージ計算（乾燥576 〜 湿潤271）
                         dry_val = 576
                         wet_val = 271
                         if soil_val > dry_val: soil_per = 0
@@ -80,10 +81,10 @@ def start_basil_monitor():
 
                         discord_msg = (
                             f"🌱 **【バジル環境・土壌レポート】**\n"
-                            f"🌡️ **温　度:** {temp:.1f} °C\n"
-                            f"💧 **湿　度:** {hum:.1f} %\n"
-                            f"🌀 **気　圧:** {pres:.1f} hPa\n"
-                            f"☀️ **照　度:** {lux:.1f} Lux\n"
+                            f"🌡️ **温 度:** {temp:.1f} °C\n"
+                            f"💧 **湿 度:** {hum:.1f} %\n"
+                            f"🌀 **気 圧:** {pres:.1f} hPa\n"
+                            f"☀️ **照 度:** {lux:.1f} Lux\n"
                             f"🪴 **土水分:** {soil_per} % ({status_comment})\n"
                             f"----------------------------"
                         )
@@ -92,7 +93,7 @@ def start_basil_monitor():
                         send_to_discord(discord_msg)
                         send_to_spreadsheet(temp, hum, pres, lux, soil_per)
                         
-                        # 1分ごとに設定中
+                        # 1分待機（テスト用）
                         time.sleep(60)
                         
                 except ValueError:
