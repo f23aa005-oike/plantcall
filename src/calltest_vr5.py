@@ -94,7 +94,7 @@ def start_basil_monitor():
                         send_to_spreadsheet(temp, hum, pres, lux, soil_per)
                         
                         # 1分待機（テスト用）
-                        time.sleep(180)
+                        time.sleep(1800)
                         
                 except ValueError:
                     pass
