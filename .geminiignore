@@ -1,0 +1,10 @@
+# Antigravity agent ignore list
+.env
+.env.local
+.env.*
+.git/
+node_modules/
+dist/
+build/
+*.key
+*.pem
