@@ -3,6 +3,8 @@ import serial as pyserial_lib
 import requests
 import time
 from dotenv import load_dotenv
+import sqlite3
+import datetime
 
 # --- 【設定】 ---
 load_dotenv()
@@ -47,7 +49,40 @@ def send_to_spreadsheet(temp, hum, pres, lux, soil_per):
     except Exception as e:
         print(f"スプレッドシートエラー: {e}")
 
+# ★新機能：SQLiteデータベースにデータを保存する関数
+def init_db():
+    conn = sqlite3.connect('plant_data.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sensor_data (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            temperature REAL,
+            humidity REAL,
+            pressure REAL,
+            lux REAL,
+            soil_moisture INTEGER
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def send_to_sqlite(temp, hum, pres, lux, soil_per):
+    try:
+        conn = sqlite3.connect('plant_data.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO sensor_data (temperature, humidity, pressure, lux, soil_moisture)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (temp, hum, pres, lux, soil_per))
+        conn.commit()
+        conn.close()
+        print("SQLiteデータベース保存成功")
+    except Exception as e:
+        print(f"SQLiteエラー: {e}")
+
 def start_basil_monitor():
+    init_db()  # データベースの初期化
     print(f"--- 5大環境センサー W通知システム起動: {TARGET_PORT} ---")
     try:
         arduino_con = pyserial_lib.Serial(port=TARGET_PORT, baudrate=TARGET_BAUD, timeout=1)
@@ -92,6 +127,7 @@ def start_basil_monitor():
                         # Discordとスプレッドシートの両方に送信！
                         send_to_discord(discord_msg)
                         send_to_spreadsheet(temp, hum, pres, lux, soil_per)
+                        send_to_sqlite(temp, hum, pres, lux, soil_per)
                         
                         # 1分待機（テスト用）
                         time.sleep(1800)

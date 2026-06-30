@@ -4,10 +4,42 @@ Project Purpose
 
 エージェントは、実装だけでなく、設計・調査・修正・レビュー・ドキュメント整理を支援します。
 
+Directory Structure
+
+```text
+plantcall/
+├── .env
+├── .geminiignore
+├── .gitignore
+├── AGENTS.md
+├── README.md
+├── .agents/
+│   └── AGENTS.md
+├── docs/ 
+│   └── memo.md
+└── src/
+    ├── arduino/
+    │   ├── LEDmodule.ino
+    │   └── arduino_test_1.0/
+    │       └── arduino_test_1.0.ino
+    └── python/
+        ├── app.py
+        ├── calltest.py
+        ├── calltest_vr2.py
+        ├── calltest_vr3.py
+        ├── calltest_vr4.py
+        ├── calltest_vr5.py
+        ├── discodeconect.py
+        └── templates/
+            └── index.html
+```
+
 Basic Rules
 
 * 目的を確認してから作業する
 * 既存の設計・命名・ディレクトリ構成を優先する
+* 生成したドキュメントファイルは `docs/` に格納する
+* 生成したプログラムファイルは `src/` に格納する
 * 不要な大規模リファクタリングをしない
 * 変更理由を簡潔に説明する
 * 破壊的な変更は事前に明示する

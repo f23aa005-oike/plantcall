@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Environment Dashboard</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-muted: #888888;
+            --primary-color: #bb86fc;
+            --temp-color: #ff5252;
+            --hum-color: #448aff;
+            --pres-color: #69f0ae;
+            --lux-color: #ffd740;
+            --soil-color: #bcaaa4;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .chart-card {
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .chart-title {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 250px !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>Plant Environment Dashboard</h1>
+    <p class="subtitle">Real-time sensor data from Arduino</p>
+
+    <div class="dashboard-container">
+        <!-- 温度 -->
+        <div class="chart-card">
+            <h2 class="chart-title">🌡️ Temperature (°C)</h2>
+            <canvas id="tempChart"></canvas>
+        </div>
+        
+        <!-- 湿度 -->
+        <div class="chart-card">
+            <h2 class="chart-title">💧 Humidity (%)</h2>
+            <canvas id="humChart"></canvas>
+        </div>
+
+        <!-- 気圧 -->
+        <div class="chart-card">
+            <h2 class="chart-title">🌀 Pressure (hPa)</h2>
+            <canvas id="presChart"></canvas>
+        </div>
+
+        <!-- 照度 -->
+        <div class="chart-card">
+            <h2 class="chart-title">☀️ Lux</h2>
+            <canvas id="luxChart"></canvas>
+        </div>
+
+        <!-- 土壌水分 -->
+        <div class="chart-card">
+            <h2 class="chart-title">🪴 Soil Moisture (%)</h2>
+            <canvas id="soilChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Chart.js共通オプション（ダークテーマ対応）
+        Chart.defaults.color = '#888888';
+        Chart.defaults.borderColor = '#333333';
+        
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { maxTicksLimit: 10 }
+                },
+                y: {
+                    beginAtZero: false
+                }
+            },
+            elements: {
+                line: { tension: 0.4 }, // 滑らかな曲線
+                point: { radius: 2, hoverRadius: 6 }
+            }
+        };
+
+        // チャートのインスタンスを保持するオブジェクト
+        const charts = {};
+
+        function createChart(ctxId, label, color, yAxisOptions = {}) {
+            const ctx = document.getElementById(ctxId).getContext('2d');
+            
+            // グラフのグラデーション作成
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, color + '80'); // 透明度50%
+            gradient.addColorStop(1, color + '00'); // 透明度0%
+
+            const options = JSON.parse(JSON.stringify(commonOptions)); // ディープコピー
+            Object.assign(options.scales.y, yAxisOptions);
+
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: label,
+                        data: [],
+                        borderColor: color,
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: options
+            });
+        }
+
+        // 初期化
+        document.addEventListener("DOMContentLoaded", () => {
+            charts.temp = createChart('tempChart', 'Temperature', '#ff5252');
+            charts.hum = createChart('humChart', 'Humidity', '#448aff', { min: 0, max: 100 });
+            charts.pres = createChart('presChart', 'Pressure', '#69f0ae');
+            charts.lux = createChart('luxChart', 'Lux', '#ffd740');
+            charts.soil = createChart('soilChart', 'Soil Moisture', '#bcaaa4', { min: 0, max: 100 });
+
+            // データ取得開始
+            fetchData();
+            // 1分ごとに自動更新
+            setInterval(fetchData, 60000); 
+        });
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                
+                if (data.length === 0) return;
+
+                // データの整形（時刻を見やすくフォーマット）
+                const labels = data.map(row => {
+                    const d = new Date(row.timestamp + 'Z'); // UTCとして解釈（sqliteはデフォルトUTCで入ることが多いため）
+                    // ローカルタイムで HH:MM:SS に変換
+                    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                });
+
+                const temps = data.map(row => row.temperature);
+                const hums = data.map(row => row.humidity);
+                const presses = data.map(row => row.pressure);
+                const luxes = data.map(row => row.lux);
+                const soils = data.map(row => row.soil_moisture);
+
+                // グラフの更新
+                updateChart(charts.temp, labels, temps);
+                updateChart(charts.hum, labels, hums);
+                updateChart(charts.pres, labels, presses);
+                updateChart(charts.lux, labels, luxes);
+                updateChart(charts.soil, labels, soils);
+
+            } catch (error) {
+                console.error("データの取得に失敗しました:", error);
+            }
+        }
+
+        function updateChart(chart, labels, data) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.update();
+        }
+    </script>
+</body>
+</html>
