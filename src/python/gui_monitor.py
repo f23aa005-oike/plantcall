@@ -14,7 +14,7 @@ from PyQt5.QtCore import QTimer
 import pyqtgraph as pg
 
 load_dotenv()
-TARGET_PORT = '/dev/ttyACM1'  
+TARGET_PORT = '/dev/ttyACM0'  
 TARGET_BAUD = 9600            
 DB_NAME = "basil_data.db"
 
