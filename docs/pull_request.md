@@ -28,6 +28,8 @@
   - ラズパイ3のハードウェア負荷を抑えるため、描画するグラフデータを直近100件に限定。
 - **[.env](file:///home/plantcall/Desktop/plantcall/src/python/localmonitor/.env)** (環境変数のダミーテンプレート)
   - Discord Webhook URL と GAS Webhook URL を記述するためのテンプレート。
+- **[setup.sh](file:///home/plantcall/Desktop/plantcall/src/python/localmonitor/setup.sh)** (自動セットアップスクリプト)
+  - 仮想環境の構築、udevルールの作成、systemdサービスの設定を自動で行うBashスクリプトを追加。
 
 ### 2. ドキュメントの整備
 - **[localmonitor_setup.md](file:///home/plantcall/Desktop/plantcall/docs/localmonitor_setup.md)** (環境構築・自動起動手順)
