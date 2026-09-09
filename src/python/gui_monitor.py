@@ -90,7 +90,7 @@ def serial_reader_thread():
                             data_queue.put((temp, hum, pres, lux, soil_per))
                         
                         current_time = time.time()
-                        if current_time - last_network_send >= 60:
+                        if current_time - last_network_send >= 300:
                             save_to_db(temp, hum, pres, lux, soil_per)
                             status = "❌ カラカラ！" if soil_per < 20 else "⚠️ 渇き気味" if soil_per < 40 else "🟢 潤い良好"
                             discord_msg = f"🌱 **【バジル環境レポート】**\n🌡️ 温度: {temp:.1f}°C / 💧 湿度: {hum:.1f}% / 🪴 土水分: {soil_per}% ({status})"
